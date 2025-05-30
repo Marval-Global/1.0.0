@@ -9,7 +9,8 @@
     "0.0.0"
   ],
   "Pages": [
-    "request.aspx"
+    "request.aspx",
+    "plugin.aspx"
   ],
   "GlobalSettings": [
     "@@SlackAppOAuthToken",
