@@ -1,0 +1,22 @@
+﻿{
+  "Name": "MarvalSoftware.Plugins.Slack",
+  "Organisation": "MarvalSoftware",
+  "DisplayName": "@@PluginDisplayname",
+  "Icon": "img/slack_16.png",
+  "Version": "1.0.1",
+  "SupportedVersions": [
+    "14.15.0",
+    "0.0.0"
+  ],
+  "Pages": [
+    "request.aspx"
+  ],
+  "GlobalSettings": [
+    "@@SlackAppOAuthToken",
+    "@@EnableMobileLink",
+    "@@MSMApiKey",
+    "@@NoteType"
+  ],
+  "HtmlImportFile": "MarvalSoftware.Plugins.Slack.html",
+  "TagName": "marvalsoftware-plugins-slack"
+}

@@ -1,0 +1,22 @@
+{
+  "defaultLocale": "en-GB",
+  "resources": [
+    {
+      "en-GB": {
+        "SettingsNotConfigured": "The following setting is not configured:",
+        "AddConfigurationViaPluginPage": "Please add this via the plugin page",
+        "PluginDisplayname": "Slack",
+        "InvalidSlackConfiguration": "Invalid Slack Configuration",
+        "SlackAppOAuthToken": "Slack App OAuth Token",
+        "MSMApiKey": "MSM API Key",
+        "SendToSlack": "Would you like to publish this request to the Slack channel:",
+        "SlackSuccessMessage": "This request has been published to Slack channel: {0}",
+        "SlackFailedToPublish": "An error occured",
+        "SlackSucceededToPublish": "Success",
+        "EnsureConfigurationSettingsCorrect": "Ensure that the configuration settings are correct.",
+        "EnableMobileLink": "Enable Mobile Link",
+        "NoteType": "Note Type"
+      }
+    }
+  ]
+}

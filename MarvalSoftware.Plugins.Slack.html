@@ -1,0 +1,272 @@
+﻿<script type="text/javascript" src="template.js"></script>
+<template>
+</template>
+
+<template class="errorTemplate">
+    <style>
+        .Slack-Errors h3,
+        .Slack-Errors h4 {
+            padding: 8px 0 8px 0;
+        }
+
+        .Slack-Config > li {
+            display: none;
+        }
+    </style>
+    <div class="Slack-Errors">
+        <div class="title">
+            <h3>@@EnsureConfigurationSettingsCorrect</h3>
+        </div>
+        <div>
+            <ul class="Slack-Config">
+                <li id="slackAppOAuthToken">@@SlackAppOAuthToken</li>
+            </ul>
+            <h4></h4>
+        </div>
+    </div>
+</template>
+
+<template class="slackErrorTemplate">
+    <style>
+        .Slack-Errors h3,
+        .Slack-Errors h4 {
+            padding: 8px 0 8px 0;
+        }
+
+        .Slack-Config > li {
+            display: none;
+        }
+    </style>
+    <div class="Slack-Errors">
+        <div class="title">
+            <h3></h3>
+        </div>
+        <div>
+            <label></label>
+        </div>
+    </div>
+</template>
+
+<template class="slackSuccessTemplate">
+    <style>
+        .Slack-Success h3,
+        .Slack-Success h4 {
+            padding: 8px 0 8px 0;
+        }
+    </style>
+    <div class="Slack-Success">
+        <div class="title">
+            <h3></h3>
+        </div>
+        <div>
+            <label></label>
+        </div>
+    </div>
+</template>
+
+<script>
+    (function () {
+
+        var MarvalSoftware = window.top.MarvalSoftware;
+        var $ = window.top.$;
+
+        async function getLatestPluginVersion() {
+            var url = "https://raw.githubusercontent.com/Marval-Global/SlackPlugin/refs/heads/master/manifest.json
+            var pagePluginVersion = $('#ctl00_ctl00_cph_maintenance_version').text();
+
+            if (pagePluginVersion == githubPluginVersion.Version) {
+                $('#ctl00_ctl00_cph_maintenance_version').css("color", "green");
+                $('#ctl00_ctl00_cph_maintenance_version').css("font-weight", "bold");
+
+                $('#uptodatemessage').fadeIn(250);
+                setTimeout(() => {
+                    $('#uptodatemessage').fadeOut(1000);
+                }, 2000);
+            } else {
+                $('#ctl00_ctl00_cph_maintenance_version').css("color", "red");
+                $('#ctl00_ctl00_cph_maintenance_version').css("font-weight", "bold");
+                $('#ctl00_ctl00_cph_maintenance_version').append(' - Plugin requires updating. Click <a href="https://github.com/Marval-Global/SlackPlugin/releases/latest/download/MarvalSoftware.Plugins.Slack.zip">here</a> for the new version.');
+            }
+        }
+
+        $(document).ready(function () {
+            getLatestPluginVersion();
+        });
+
+
+        MarvalSoftware.Plugins.define("marvalsoftware-plugins-slack",
+            {
+                _requestId: null,
+                _requestNumber: null,
+                _requestAcronym: null,
+                _request: MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage(),
+
+                init: function () {
+                    this._requestId = this._request._requestId;
+                    this._requestNumber = this._request._originalRequestNumber.toString();
+                    this._requestAcronym = this._request._requestTypeAcronym;
+                    if (this._requestId) {
+                        this._setUpQuickMenu();
+                    }
+                },
+
+                _popup: function () {
+                    MarvalSoftware.UI.MessageBox.show(
+                        this._getString("@@PluginDisplayname"),
+                        this._getString("@@SendToSlack") + " " + this._requestAcronym + "-" + this._requestNumber + "?",
+                        MarvalSoftware.UI.MessageBox.Types.INFORMATION,
+                        [MarvalSoftware.UI.MessageBox.Buttons.YES, MarvalSoftware.UI.MessageBox.Buttons.NO],
+                        MarvalSoftware.UI.MessageBox.Buttons.NO,
+                        450,
+                        MarvalSoftware.createDelegate(function (sender, e) {
+                            if (e.button == MarvalSoftware.UI.MessageBox.Buttons.YES) {
+                                $.ajax({
+                                    type: "POST",
+                                    url: this._getPluginPath() + "handler/ApiHandler.ashx?action=PublishToSlack&requestId=" + this._requestId + "&requestNumber=" + this._requestNumber,
+                                    contentType: "application/json",
+                                    dataType: "json",
+                                    success: function (result) {
+                                        if (result && result.ok) {
+                                            this._slackSuccessPopup();
+                                        }
+                                        else {
+                                            this._slackErrorPopup(result);
+                                        }
+                                    }.bind(this)
+                                });
+                            }
+                        }, this)
+                    );
+                },
+
+                _preRequisiteCheck: function (sender, e) {
+                    $.ajax({
+                        type: "POST",
+                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=PreRequisiteCheck",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (result) {
+                            if (Object.keys(result).length > 0) {
+                                this._errorPopup(result);
+                            }
+                            else {
+                                this._popup();
+                            }
+                        }.bind(this)
+                    });
+                },
+
+                _slackSuccessPopup: function () {
+                    var slackSuccessTemplate = document.querySelector('.slackSuccessTemplate').content;
+                    var slackSuccessMessage = window.top.document.importNode(slackSuccessTemplate, true);
+                    var slackSuccesTemplateDiv = slackSuccessMessage.querySelector(".Slack-Success");
+                    slackSuccesTemplateDiv.innerHTML = this._preProcessResourceString(slackSuccesTemplateDiv.innerHTML);
+                    slackSuccessMessage.querySelector('div > h3').textContent = this._getString("@@SlackSucceededToPublish");
+                    slackSuccessMessage.querySelector('div > label').textContent = this._getString("@@SlackSuccessMessage", (this._requestAcronym + "-" + this._requestNumber));
+                    MarvalSoftware.UI.MessageBox.show(
+                        this._getString("@@PluginDisplayname"),
+                        slackSuccessMessage,
+                        MarvalSoftware.UI.MessageBox.Types.INFORMATION,
+                        [MarvalSoftware.UI.MessageBox.Buttons.OK],
+                        MarvalSoftware.UI.MessageBox.Buttons.OK,
+                        450
+                    );
+                },
+
+                _slackErrorPopup: function (result) {
+                    var slackErrorTemplate = document.querySelector('.slackErrorTemplate').content;
+                    var slackErrorMessages = window.top.document.importNode(slackErrorTemplate, true);
+                    var slackErrorTemplateDiv = slackErrorMessages.querySelector(".Slack-Errors");
+                    slackErrorTemplateDiv.innerHTML = this._preProcessResourceString(slackErrorTemplateDiv.innerHTML);
+                    slackErrorMessages.querySelector('div > h3').textContent = this._getString("@@SlackFailedToPublish");
+                    slackErrorMessages.querySelector('div > label').textContent = result.error;
+                    MarvalSoftware.UI.MessageBox.show(
+                        this._getString("@@PluginDisplayname"),
+                        slackErrorMessages,
+                        MarvalSoftware.UI.MessageBox.Types.ERROR,
+                        [MarvalSoftware.UI.MessageBox.Buttons.OK],
+                        MarvalSoftware.UI.MessageBox.Buttons.OK,
+                        450
+                    );
+                },
+
+                _errorPopup: function (result) {
+                    var errorTemplate = document.querySelector('.errorTemplate').content;
+                    var errorMessages = window.top.document.importNode(errorTemplate, true);
+                    var errorTemplateDiv = errorMessages.querySelector(".Slack-Errors");
+                    errorTemplateDiv.innerHTML = this._preProcessResourceString(errorTemplateDiv.innerHTML);
+                    if (result) {
+                        for (var item in result) {
+                            var id = "#" + item;
+                            errorMessages.querySelector(id).style.display = "block";
+                        }
+                        errorMessages.querySelector('div > h3').textContent = this._getString("@@SettingsNotConfigured");
+                        errorMessages.querySelector('div > h4').textContent = this._getString("@@AddConfigurationViaPluginPage");
+                    }
+                    MarvalSoftware.UI.MessageBox.show(
+                        this._getString("@@InvalidSlackConfiguration"),
+                        errorMessages,
+                        MarvalSoftware.UI.MessageBox.Types.ERROR,
+                        [MarvalSoftware.UI.MessageBox.Buttons.OK],
+                        MarvalSoftware.UI.MessageBox.Buttons.OK,
+                        450
+                    );
+                },
+
+                _preProcessResourceString: function (content) {
+                    var resourceTagRegEx = /@@\w+\b/g;
+                    var match = resourceTagRegEx.exec(content);
+
+                    while (match) {
+                        var foundTag = match[0];
+                        var resourcedKey = this._getString(foundTag);
+                        content = content.replace(foundTag, resourcedKey);
+
+                        var match = resourceTagRegEx.exec(content);
+                    }
+
+                    return content;
+                },
+
+                _getPluginPath: function () {
+                    return this.attributes["data-pluginpath"].value;
+                },
+
+                _getPluginId: function () {
+                    return this.attributes["data-pluginid"].value;
+                },
+
+                _getPluginCulture: function () {
+                    return this.attributes["data-pluginculture"].value;
+                },
+
+                _getString: function (key, formatObject) {
+                    if (MarvalSoftware.Plugins.PluginResourceManager) {
+                        return MarvalSoftware.Plugins.PluginResourceManager.getInstance().getString(this._getPluginId(), key, this._getPluginCulture(), formatObject);
+                    } else {
+                        return key;
+                    }
+                },
+
+                _setUpQuickMenu: function () {
+                    var styleElement = window.top.document.createElement("style");
+                    window.top.document.body.appendChild(styleElement);
+                    styleElement.sheet.insertRule(".marvalSoftware-slack-quick-menu-item { background-image: url(" + this._getPluginPath() + "img/slack_32.png); }", 0);
+
+                    var quickMenuId = window.top.document.querySelector(".quickMenu").id;
+                    var quickMenu = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getControl(quickMenuId);
+                    quickMenu.addMenuItem({
+                        Identifier: "marvalSoftware-slack",
+                        Label: this._getString("@@PluginDisplayname"),
+                        HRef: "javascript:void(0);",
+                        CssClass: "marvalSoftware-slack-quick-menu-item"
+                    });
+                    quickMenu.onMenuItemClicked.subscribe(function (sender, e) {
+                        if (e.menuItem.getIdentifier() === "marvalSoftware-slack") {
+                            this._preRequisiteCheck();
+                        }
+                    }, this);
+                }
+            });
+    })();
+</script>
