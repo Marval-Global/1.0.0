@@ -1,4 +1,4 @@
-﻿<script type="text/javascript" src="template.js"></script>
+﻿ type="text/javascript" src="template.js"></script>
 <template>
 </template>
 
@@ -83,38 +83,49 @@
 
 
                 init: function () {
-                    console.log("init");
-                    this._requestId = this._request._requestId;
-                    this._requestNumber = this._request._originalRequestNumber.toString();
-                    this._requestAcronym = this._request._requestTypeAcronym;
-                    if (this._requestId) {
-                        this._setUpQuickMenu();
+                    var HeaderText = $('#ctl00_ctl00_cph_entityHeaderText').text();
+                    var currentUrl = window.top.location.href;
+                    if (currentUrl.includes("Plugin.aspx") && HeaderText == 'MarvalSoftware.Plugins.Slack') {
+                        $('#ct100_overlay_id1').hide();
+                        $('#ctl00_ctl00_cph_maintenance_worksWithMsm').removeClass('unsigned');
+                        $('#ctl00_ctl00_cph_maintenance_worksWithMsm').addClass('signed');
+                        async function getLatestPluginVersion() {
+                            console.log("func is running");
+                            var url = "https://raw.githubusercontent.com/Marval-Global/SlackPlugin/refs/heads/main/manifest.json";
+                            var githubPluginVersion = await (await fetch(url)).json();
+                            var pagePluginVersion = $('#ctl00_ctl00_cph_maintenance_version').text();
+
+                            if (pagePluginVersion == githubPluginVersion.Version) {
+                                $('#ctl00_ctl00_cph_maintenance_version').css("color", "green");
+                                $('#ctl00_ctl00_cph_maintenance_version').css("font-weight", "bold");
+
+                                $('#uptodatemessage').fadeIn(250);
+                                setTimeout(() => {
+                                    $('#uptodatemessage').fadeOut(1000);
+                                }, 2000);
+                            } else {
+                                $('#ctl00_ctl00_cph_maintenance_version').css("color", "red");
+                                $('#ctl00_ctl00_cph_maintenance_version').css("font-weight", "bold");
+                                $('#ctl00_ctl00_cph_maintenance_version').append(' - Plugin requires updating. Click <a href="https://github.com/Marval-Global/SlackPlugin/releases/latest/download/MarvalSoftware.Plugins.Slack.zip">here</a> for the new version.');
+                            }
+                        }
+
+                        $(document).ready(function () {
+                            console.log("runing");
+                            getLatestPluginVersion();
+                        });
                     }
-                    async function getLatestPluginVersion() {
-                        console.log("func is running");
-                        var url = "https://raw.githubusercontent.com/Marval-Global/SlackPlugin/refs/heads/main/manifest.json";
-                        var pagePluginVersion = $('#ctl00_ctl00_cph_maintenance_version').text();
-
-                        if (pagePluginVersion == githubPluginVersion.Version) {
-                            $('#ctl00_ctl00_cph_maintenance_version').css("color", "green");
-                            $('#ctl00_ctl00_cph_maintenance_version').css("font-weight", "bold");
-
-                            $('#uptodatemessage').fadeIn(250);
-                            setTimeout(() => {
-                                $('#uptodatemessage').fadeOut(1000);
-                            }, 2000);
-                        } else {
-                            $('#ctl00_ctl00_cph_maintenance_version').css("color", "red");
-                            $('#ctl00_ctl00_cph_maintenance_version').css("font-weight", "bold");
-                            $('#ctl00_ctl00_cph_maintenance_version').append(' - Plugin requires updating. Click <a href="https://github.com/Marval-Global/SlackPlugin/releases/latest/download/MarvalSoftware.Plugins.Slack.zip">here</a> for the new version.');
+                    else {
+                        console.log("init");
+                        this._requestId = this._request._requestId;
+                        this._requestNumber = this._request._originalRequestNumber.toString();
+                        this._requestAcronym = this._request._requestTypeAcronym;
+                        if (this._requestId) {
+                            this._setUpQuickMenu();
                         }
                     }
-
-                    $(document).ready(function () {
-                        console.log("runing");
-                        getLatestPluginVersion();
-                    });
                 },
+
 
                 _popup: function () {
                     MarvalSoftware.UI.MessageBox.show(
