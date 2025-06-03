@@ -1,4 +1,4 @@
-﻿ type="text/javascript" src="template.js"></script>
+ type="text/javascript" src="template.js"></script>
 <template>
 </template>
 
@@ -90,7 +90,6 @@
                         $('#ctl00_ctl00_cph_maintenance_worksWithMsm').removeClass('unsigned');
                         $('#ctl00_ctl00_cph_maintenance_worksWithMsm').addClass('signed');
                         async function getLatestPluginVersion() {
-                            console.log("func is running");
                             var url = "https://raw.githubusercontent.com/Marval-Global/SlackPlugin/refs/heads/main/manifest.json";
                             var githubPluginVersion = await (await fetch(url)).json();
                             var pagePluginVersion = $('#ctl00_ctl00_cph_maintenance_version').text();
@@ -111,19 +110,16 @@
                         }
 
                         $(document).ready(function () {
-                            console.log("runing");
                             getLatestPluginVersion();
                         });
                     }
-                    else {
-                        console.log("init");
+                    else if (currentUrl.includes("Request.aspx")){
                         this._requestId = this._request._requestId;
                         this._requestNumber = this._request._originalRequestNumber.toString();
                         this._requestAcronym = this._request._requestTypeAcronym;
-                        if (this._requestId) {
-                            this._setUpQuickMenu();
-                        }
+
                     }
+                    this._setUpQuickMenu();
                 },
 
 
