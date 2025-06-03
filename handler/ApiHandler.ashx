@@ -160,7 +160,6 @@ public class ApiHandler : PluginHandler
         else
         {
             dynamic response = slackClient.GetAllChannels();
-            Log.Information("all channels are: " + response);
             if ((bool)response.ok.Value)
             {
                 var channelId = slackClient.DoesChannelExist(request.Text, response);
@@ -409,13 +408,10 @@ public class ApiHandler : PluginHandler
         {
             this.apiKey = apiKey;
             this.baseUri = new Uri(baseUrl);
-            Log.Information("Api key is: " + apiKey);
-            Log.Information("base uri is: " + baseUrl);
         }
 
         public string PostMessage(string channelId, Payload payload)
         {
-            Log.Information("channel id is: " + channelId);
             payload.Channel = channelId;
             string payloadJson = JsonConvert.SerializeObject(payload);
             return this.CreateMessage(this.baseUri + "chat.postMessage", payloadJson, "POST");
@@ -559,7 +555,6 @@ public class ApiHandler : PluginHandler
             data = new Dictionary<string, string> {{"name",  name}};
             var response = this.ProcessRequest(url, JsonConvert.SerializeObject(data), method);
             var responseObject = JsonConvert.DeserializeObject<dynamic>(response);
-            Log.Information("res ob is: " + responseObject);
             return responseObject.channel.id;
         }
 
