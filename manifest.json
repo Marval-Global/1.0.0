@@ -3,7 +3,7 @@
   "Organisation": "MarvalSoftware",
   "DisplayName": "@@PluginDisplayname",
   "Icon": "img/slack_16.png",
-  "Version": "1.0.7",
+  "Version": "1.0.8",
   "SupportedVersions": [
     "14.15.0",
     "0.0.0"
